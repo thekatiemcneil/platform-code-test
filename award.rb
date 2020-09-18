@@ -12,8 +12,10 @@ class Award
       if award.name != 'Blue First' && award.name != 'Blue Compare'
         if award.quality > 0
           if award.name == 'Blue Star'
+            # award quality should lose two points only if it can do so without becoming negative
             if award.quality > 1
               award.quality -= 2
+              # otherwise, award quality should simply equal zero
             else
               award.quality = 0
             end
@@ -43,8 +45,10 @@ class Award
       end
       if award.expires_in < 0
         if award.name == 'Blue Star'
+          # award quality should lose two points only if it can do so without becoming negative
           if award.quality > 1
             award.quality -= 2
+            # otherwise, award quality should simply equal zero
           else
             award.quality = 0
           end
@@ -66,6 +70,4 @@ class Award
       end
     end
   end
-
-
 end
