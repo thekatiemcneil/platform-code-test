@@ -6,6 +6,7 @@ class Award(object):
 
     def update_quality(self, awards):
             for award in awards:
+                # Blue Distinction Plus awards should not change
                 if award.name != 'Blue Distinction Plus':
                     if award.name == 'Blue First':
                         self.update_bf(award)
@@ -15,14 +16,8 @@ class Award(object):
                         self.update_bs(award)
                     else:
                         self.update_gen(award)
-                    self.update_expires(award)
+                    award.expires_in -= 1
                     self.fix_overages(award)
-
-    def update_gen(self, award):
-        if award.expires_in > 0:
-            award.quality -= 1
-        else:
-            award.quality -= 2
 
     # update Blue Compare award
     def update_bc(self, award):
@@ -48,11 +43,13 @@ class Award(object):
         else:
             award.quality -= 4
 
-    def update_expires(self, award):
-        award.expires_in -= 1
+    # update all other awards
+    def update_gen(self, award):
+        award.quality -= 1
+        if award.expires_in <= 0:
+            award.quality -= 1
 
+    # fix any values that have exceeded quality parameters
     def fix_overages(self, award):
-        if award.quality > 50:
-            award.quality = 50
-        if award.quality < 0:
-            award.quality = 0
+        if award.quality > 50: award.quality = 50
+        if award.quality < 0: award.quality = 0

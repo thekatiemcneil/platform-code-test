@@ -9,65 +9,73 @@ class Award
 
   def update_quality(awards)
     awards.each do |award|
-      if award.name != 'Blue First' && award.name != 'Blue Compare'
-        if award.quality > 0
-          if award.name == 'Blue Star'
-            # award quality should lose two points only if it can do so without becoming negative
-            if award.quality > 1
-              award.quality -= 2
-              # otherwise, award quality should simply equal zero
-            else
-              award.quality = 0
-            end
-          elsif award.name != 'Blue Distinction Plus'
-            award.quality -= 1
-          end
-        end
-      else
-        if award.quality < 50
-          award.quality += 1
-          if award.name == 'Blue Compare'
-            if award.expires_in < 11
-              if award.quality < 50
-                award.quality += 1
-              end
-            end
-            if award.expires_in < 6
-              if award.quality < 50
-                award.quality += 1
-              end
-            end
-          end
-        end
-      end
+      # Blue Distinction Plus awards should not change
       if award.name != 'Blue Distinction Plus'
-        award.expires_in -= 1
-      end
-      if award.expires_in < 0
-        if award.name == 'Blue Star'
-          # award quality should lose two points only if it can do so without becoming negative
-          if award.quality > 1
-            award.quality -= 2
-            # otherwise, award quality should simply equal zero
-          else
-            award.quality = 0
-          end
-        elsif award.name != 'Blue First'
-          if award.name != 'Blue Compare'
-            if award.quality > 0
-              if award.name != 'Blue Distinction Plus'
-                award.quality -= 1
-              end
-            end
-          else
-            award.quality = award.quality - award.quality
-          end
+        case award.name
+        when 'Blue First'
+          update_bf(award)
+        when 'Blue Compare'
+          update_bc(award)
+        when 'Blue Star'
+          update_bs(award)
         else
-          if award.quality < 50
-            award.quality += 1
-          end
+          update_gen(award)
         end
+        award.expires_in -= 1
+        fix_overages(award)
       end
     end
   end
+
+  # update Blue Compare award
+  def update_bc(award)
+    if award.expires_in > 0
+      award.quality += 1
+    end
+    if award.expires_in <= 10
+      award.quality += 1
+    end
+    if award.expires_in <= 5
+      award.quality += 1
+    end
+    if award.expires_in <= 0
+      award.quality = 0
+    end
+  end
+
+  # update Blue First award
+  def update_bf(award)
+    award.quality += 1
+    if award.expires_in <= 0
+      award.quality += 1
+    end
+  end
+
+  # update Blue Star award
+  def update_bs(award)
+    if award.expires_in > 0
+      award.quality -= 2
+    else
+      award.quality -= 4
+    end
+  end
+
+  # update all other awards
+  def update_gen(award)
+    award.quality -= 1
+    if award.expires_in <= 0
+      award.quality -= 1
+    end
+  end
+
+  # fix any values that have exceeded quality parameters
+  def fix_overages(award)
+    if award.quality > 50
+      award.quality = 50
+    end
+    if award.quality < 0
+      award.quality = 0
+    end
+  end
+
 end
